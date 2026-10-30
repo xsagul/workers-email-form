@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact</title>
+<style>
+  body { font: 16px/1.5 system-ui, sans-serif; max-width: 34rem; margin: 3rem auto; padding: 0 1rem; }
+  label { display: block; margin-top: 1rem; font-weight: 600; }
+  input, textarea { width: 100%; padding: .6rem; font: inherit; box-sizing: border-box; }
+  button { margin-top: 1.25rem; padding: .7rem 1.2rem; font: inherit; cursor: pointer; }
+  /* The trap field: hidden from people, but still in the form for bots. */
+  .trap { position: absolute; left: -9999px; }
+</style>
+
+<h1>Contact</h1>
+<form id="contact">
+  <label>Name <input name="name" required maxlength="120"></label>
+  <label>Phone or email <input name="contact" required maxlength="160"></label>
+  <label>Company or website <input name="company" maxlength="200"></label>
+  <label>Message <textarea name="message" rows="5" maxlength="4000"></textarea></label>
+  <div class="trap" aria-hidden="true">
+    <label>Website <input name="website" tabindex="-1" autocomplete="off"></label>
+  </div>
+  <button>Send</button>
+  <p id="status" role="status"></p>
+</form>
+
+<script>
+  const form = document.getElementById("contact");
+  const status = document.getElementById("status");
+  const opened = Date.now();
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(form));
+    data.opened = opened;
+    status.textContent = "Sending…";
+    try {
+      const res = await fetch("/send", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const out = await res.json();
+      status.textContent = out.ok ? "Thanks, we got your message." : out.message;
+      if (out.ok) form.reset();
+    } catch {
+      status.textContent = "Could not send. Please try again.";
+    }
+  });
+</script>
+</html>

@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "workers-email-form",
+  "compatibility_date": "2026-10-01",
+  "main": "src/index.js",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    // Only the form endpoint runs the script; everything else is served as a static file.
+    "run_worker_first": ["/send"],
+    "not_found_handling": "404-page"
+  },
+  // Email Routing must be enabled on the zone, and RECIPIENT must be a verified destination address.
+  "send_email": [{ "name": "EMAIL" }],
+  "vars": {
+    // An address on your domain that Email Routing can send from.
+    "SENDER": "form@example.com",
+    // The verified destination address that receives the requests.
+    "RECIPIENT": "you@example.com",
+    // Optional: the address shown in the To: header (for example a public contact@ alias).
+    "SHOWN_TO": "contact@example.com"
+  }
+}
